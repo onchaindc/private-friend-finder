@@ -21,6 +21,11 @@ Arcium is the intended confidential compute layer. Its TypeScript SDK supports e
 - Deterministic local PSI simulator for demo runs.
 - Solana memo transaction that logs only commitments, run id, mode, and match count.
 - Arcium adapter and circuit notes ready for a deployed MXE.
+- Static demo experience with default Arcium theme, light mode, and dark mode.
+- Mutual friend chain visualization with clickable path inspection.
+- Invite-code groups with shareable link and QR onboarding flow.
+- Verification badges derived from first-proof age in the demo model.
+- Ephemeral direct messaging after a mutual match is established.
 
 Note: wagmi and RainbowKit are EVM wallet libraries, so this Solana app uses Solana Wallet Adapter instead.
 
@@ -50,8 +55,27 @@ Open `demo/index.html` directly in a browser. This is the fastest 48-hour demo p
 - Run private set intersection locally.
 - Connect Phantom.
 - Log a compact devnet memo proof if the browser can load Solana Web3 from the CDN.
+- Explore mutual friend chains, invite-code groups, badges, and session-only chat.
 
 The standalone demo uses the same privacy model as the Next app but avoids any npm install step.
+
+## Feature Notes
+
+### Mutual Friend Chains
+
+The demo generates deterministic relationship paths from each match hash and renders them in an interactive D3 graph. In production, this should be swapped for on-chain graph edges or an Arcium-generated private graph output.
+
+### Invite Codes
+
+Invite codes use the format `MFF_xxx...` and generate a QR plus a shareable join link. The demo stores the active code in browser storage. A production build should derive a PDA from the invite code and store group membership on-chain.
+
+### Verification Badges
+
+Verification status is shown on match cards and profile surfaces. The demo computes this from a synthetic proof age. A production build should fetch the first registration timestamp from chain history and mark badges after 30 days.
+
+### Direct Messaging
+
+Direct messaging is session-only and encrypted in-browser for the demo. Messages are not stored on a server and disappear on refresh. A production build can swap this for wallet-to-wallet encrypted messaging with a lightweight relay or websocket transport.
 
 ## Deploy The Demo
 
