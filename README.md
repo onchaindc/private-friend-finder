@@ -1,5 +1,7 @@
 # Private Friend Finder
 
+A Solana-based app that discovers mutual friends between users using Arcium-ready private set intersection. No contact lists are uploaded, raw contacts are not logged on-chain, and the demo reveals only masked mutual matches.
+
 Hackathon MVP for private contact discovery on Solana with an Arcium-ready private set intersection flow.
 
 The app lets a user connect a Solana wallet, load contacts locally, find mutual friends with minimal disclosure, and write a compact proof memo on Solana. CSV files never leave the browser in the shipped demo.
