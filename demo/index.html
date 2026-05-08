@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Private Friend Finder Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://unpkg.com/@solana/web3.js@1.98.0/lib/index.iife.min.js"></script>
     <style>
       :root {
@@ -16,6 +22,36 @@
         --berry: #7b2cbf;
         --lagoon: #0077b6;
         --line: rgba(16, 24, 32, 0.12);
+        --page: #f8f8f2;
+        --card: #ffffff;
+        --card-soft: #f4f6ee;
+        --text: #101820;
+        --text-muted: rgba(16, 24, 32, 0.66);
+        --text-soft: rgba(16, 24, 32, 0.46);
+        --shadow: 0 20px 60px rgba(16, 24, 32, 0.11);
+        --topbar: rgba(255, 255, 255, 0.86);
+        --hero-glow: rgba(216, 243, 220, 0.5);
+      }
+
+      html[data-theme="dark"] {
+        color-scheme: dark;
+        --ink: #f8faf7;
+        --cloud: #111816;
+        --mint: #173c2b;
+        --fern: #8fd6ad;
+        --ember: #f8ba6a;
+        --berry: #d6b4ff;
+        --lagoon: #83c5f2;
+        --line: rgba(238, 245, 235, 0.14);
+        --page: #080d0c;
+        --card: #101614;
+        --card-soft: #141d1a;
+        --text: #f8faf7;
+        --text-muted: rgba(248, 250, 247, 0.68);
+        --text-soft: rgba(248, 250, 247, 0.46);
+        --shadow: 0 24px 70px rgba(0, 0, 0, 0.36);
+        --topbar: rgba(12, 18, 16, 0.9);
+        --hero-glow: rgba(45, 106, 79, 0.24);
       }
 
       * {
@@ -26,12 +62,13 @@
         min-height: 100vh;
         margin: 0;
         background:
-          linear-gradient(180deg, rgba(216, 243, 220, 0.55), rgba(247, 248, 243, 0) 34rem),
-          var(--cloud);
-        color: var(--ink);
+          radial-gradient(circle at top left, var(--hero-glow), transparent 30rem),
+          linear-gradient(180deg, var(--page), var(--cloud));
+        color: var(--text);
         font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "DM Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
+        transition: background 180ms ease, color 180ms ease;
       }
 
       button,
@@ -50,8 +87,11 @@
 
       .topbar {
         border-bottom: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.86);
+        background: var(--topbar);
         backdrop-filter: blur(16px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
       }
 
       .topbar-inner,
@@ -81,7 +121,7 @@
         place-items: center;
         border-radius: 8px;
         background: var(--ink);
-        color: white;
+        color: var(--page);
         font-weight: 900;
       }
 
@@ -90,7 +130,7 @@
         color: var(--fern);
         font-size: 12px;
         font-weight: 900;
-        letter-spacing: 0.16em;
+        letter-spacing: 0;
         text-transform: uppercase;
       }
 
@@ -105,6 +145,13 @@
         margin-bottom: 0;
         font-size: clamp(22px, 4vw, 32px);
         line-height: 1.05;
+      }
+
+      h1,
+      h2 {
+        color: var(--text);
+        font-family: "Playfair Display", Georgia, serif;
+        letter-spacing: 0;
       }
 
       .shell {
@@ -122,8 +169,50 @@
       .surface {
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: white;
-        box-shadow: 0 18px 50px rgba(16, 24, 32, 0.12);
+        background: var(--card);
+        box-shadow: var(--shadow);
+      }
+
+      .topbar-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .app-nav,
+      .theme-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card-soft);
+        padding: 4px;
+      }
+
+      .nav-pill,
+      .theme-option {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--text-muted);
+        padding: 0 12px;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .nav-pill:hover,
+      .theme-option:hover,
+      .theme-option.is-active {
+        background: var(--card);
+        color: var(--text);
       }
 
       .panel {
@@ -145,8 +234,39 @@
       }
 
       .muted {
-        color: rgba(16, 24, 32, 0.68);
+        color: var(--text-muted);
         line-height: 1.65;
+      }
+
+      .intro-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .intro-card,
+      .guide-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--card-soft);
+        padding: 14px;
+      }
+
+      .intro-card strong,
+      .guide-card strong {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--text);
+        font-size: 15px;
+      }
+
+      .intro-card p,
+      .guide-card p {
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.55;
       }
 
       .upload-grid {
@@ -156,10 +276,10 @@
       }
 
       .upload-card {
-        border: 1px dashed rgba(16, 24, 32, 0.18);
+        border: 1px dashed var(--line);
         border-radius: 8px;
         padding: 16px;
-        background: white;
+        background: var(--card);
       }
 
       .upload-head {
@@ -182,15 +302,15 @@
         place-items: center;
         border-radius: 8px;
         border: 1px solid rgba(45, 106, 79, 0.25);
-        background: rgba(216, 243, 220, 0.65);
+        background: var(--mint);
         color: var(--fern);
         font-weight: 900;
       }
 
       .upload-card:nth-child(2) .icon {
         border-color: rgba(247, 127, 0, 0.25);
-        background: #fff7ed;
-        color: #9a3412;
+        background: rgba(247, 127, 0, 0.12);
+        color: var(--ember);
       }
 
       .upload-card h3 {
@@ -222,8 +342,8 @@
       }
 
       .btn-dark {
-        background: var(--ink);
-        color: white;
+        background: var(--text);
+        color: var(--page);
       }
 
       .btn-green {
@@ -252,13 +372,13 @@
       .count {
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: var(--cloud);
+        background: var(--card-soft);
         padding: 10px 12px;
       }
 
       .count span {
         display: block;
-        color: rgba(16, 24, 32, 0.48);
+        color: var(--text-soft);
         font-size: 11px;
         font-weight: 900;
         text-transform: uppercase;
@@ -283,7 +403,7 @@
       .status {
         min-height: 22px;
         margin: 0;
-        color: rgba(16, 24, 32, 0.68);
+        color: var(--text-muted);
         font-size: 14px;
         font-weight: 800;
       }
@@ -315,7 +435,7 @@
         gap: 12px;
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: var(--cloud);
+        background: var(--card-soft);
         padding: 12px;
       }
 
@@ -326,7 +446,7 @@
         flex: 0 0 auto;
         place-items: center;
         border-radius: 6px;
-        background: white;
+        background: var(--card);
         color: var(--fern);
         font-weight: 900;
       }
@@ -338,7 +458,7 @@
 
       .privacy-step p {
         margin-bottom: 0;
-        color: rgba(16, 24, 32, 0.66);
+        color: var(--text-muted);
         font-size: 14px;
         line-height: 1.55;
       }
@@ -347,9 +467,149 @@
         margin-top: 16px;
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: var(--cloud);
+        background: var(--card-soft);
         padding: 12px;
         font-size: 14px;
+      }
+
+      .profile-card {
+        display: grid;
+        gap: 14px;
+      }
+
+      .profile-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .avatar {
+        display: grid;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--fern), var(--lagoon));
+        color: white;
+        font-weight: 900;
+      }
+
+      .settings-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      .setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--card-soft);
+        padding: 12px;
+      }
+
+      .setting-row strong {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      .setting-row span {
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      .toggle {
+        width: 46px;
+        height: 26px;
+        appearance: none;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--cloud);
+        position: relative;
+      }
+
+      .toggle::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--text-soft);
+        transition: transform 150ms ease, background 150ms ease;
+      }
+
+      .toggle:checked {
+        background: var(--mint);
+      }
+
+      .toggle:checked::after {
+        background: var(--fern);
+        transform: translateX(20px);
+      }
+
+      .guide-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .guide-card h3 {
+        margin-bottom: 10px;
+        color: var(--text);
+        font-size: 18px;
+      }
+
+      .guide-card ol,
+      .guide-card ul {
+        margin: 0;
+        padding-left: 20px;
+        color: var(--text-muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .activity-log {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .log-item {
+        display: grid;
+        grid-template-columns: 12px minmax(0, 1fr);
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--card-soft);
+        padding: 10px;
+      }
+
+      .log-dot {
+        width: 8px;
+        height: 8px;
+        margin-top: 6px;
+        border-radius: 50%;
+        background: var(--fern);
+      }
+
+      .log-item strong {
+        display: block;
+        color: var(--text);
+        font-size: 13px;
+      }
+
+      .log-item span {
+        display: block;
+        margin-top: 2px;
+        color: var(--text-muted);
+        font-size: 12px;
+        line-height: 1.45;
       }
 
       .mode strong {
@@ -369,7 +629,7 @@
       .run-id {
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: var(--cloud);
+        background: var(--card-soft);
         padding: 8px 10px;
         font-size: 13px;
         font-weight: 900;
@@ -393,8 +653,8 @@
 
       .row:first-child {
         border-top: 0;
-        background: var(--ink);
-        color: white;
+        background: var(--text);
+        color: var(--page);
         font-size: 12px;
         font-weight: 900;
         text-transform: uppercase;
@@ -414,7 +674,7 @@
       .commitment {
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: var(--cloud);
+        background: var(--card-soft);
         padding: 11px;
       }
 
@@ -429,7 +689,7 @@
 
       .commitment code {
         overflow-wrap: anywhere;
-        color: rgba(16, 24, 32, 0.72);
+        color: var(--text-muted);
         font-size: 12px;
       }
 
@@ -449,12 +709,12 @@
         justify-content: space-between;
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: var(--cloud);
+        background: var(--card-soft);
         padding: 10px 12px;
       }
 
       .metric span {
-        color: rgba(16, 24, 32, 0.66);
+        color: var(--text-muted);
         font-size: 14px;
         font-weight: 800;
       }
@@ -480,8 +740,23 @@
         text-decoration: none;
       }
 
+      body.compact .panel {
+        padding: 18px;
+      }
+
+      body.compact .upload-grid,
+      body.compact .privacy-list,
+      body.compact .stack {
+        gap: 12px;
+      }
+
       @media (max-width: 900px) {
         .shell {
+          grid-template-columns: 1fr;
+        }
+
+        .intro-grid,
+        .guide-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -494,6 +769,16 @@
         .results-head {
           align-items: stretch;
           flex-direction: column;
+        }
+
+        .topbar-actions {
+          justify-content: stretch;
+        }
+
+        .app-nav,
+        .theme-switch {
+          width: 100%;
+          justify-content: center;
         }
 
         .commitments {
@@ -516,13 +801,24 @@
             <h1>Private Friend Finder</h1>
           </div>
         </div>
-        <button id="walletButton" class="btn btn-dark" type="button">Connect Phantom</button>
+        <div class="topbar-actions">
+          <nav class="app-nav" aria-label="App sections">
+            <a class="nav-pill" href="#finder">Finder</a>
+            <a class="nav-pill" href="#guide">Guide</a>
+            <a class="nav-pill" href="#settings">Settings</a>
+          </nav>
+          <div class="theme-switch" aria-label="Theme">
+            <button id="themeLight" class="theme-option" type="button">Light</button>
+            <button id="themeDark" class="theme-option" type="button">Dark</button>
+          </div>
+          <button id="walletButton" class="btn btn-dark" type="button">Connect Phantom</button>
+        </div>
       </div>
     </header>
 
     <main class="shell">
       <div class="stack">
-        <section class="surface panel">
+        <section id="finder" class="surface panel">
           <div class="hero">
             <div>
               <p class="eyebrow">Find matches privately</p>
@@ -533,6 +829,21 @@
               </p>
             </div>
             <button id="sampleButton" class="btn btn-soft" type="button">Load Sample</button>
+          </div>
+
+          <div class="intro-grid">
+            <div class="intro-card">
+              <strong>What it does</strong>
+              <p>Finds overlap between two contact sets without publishing either address book.</p>
+            </div>
+            <div class="intro-card">
+              <strong>How it works</strong>
+              <p>Normalizes contacts, hashes identifiers, compares sets, then shows only masked matches.</p>
+            </div>
+            <div class="intro-card">
+              <strong>What gets logged</strong>
+              <p>Only commitments, run id, and match count can be sent to Solana as proof.</p>
+            </div>
           </div>
 
           <div class="upload-grid">
@@ -610,6 +921,36 @@
           </div>
           <div id="proofLink" class="proof-link"></div>
         </section>
+
+        <section id="guide" class="surface panel">
+          <p class="eyebrow">Guide</p>
+          <h2>How to operate the app</h2>
+          <div class="guide-grid">
+            <article class="guide-card">
+              <h3>Run a private check</h3>
+              <ol>
+                <li>Load sample contacts or upload two CSV files.</li>
+                <li>Confirm both counters show usable contacts.</li>
+                <li>Press Find Matches to compute the overlap locally.</li>
+              </ol>
+            </article>
+            <article class="guide-card">
+              <h3>Understand the mechanism</h3>
+              <p>
+                Each contact becomes a normalized email or phone key. The app hashes those keys, compares hash sets, and
+                displays only the matches that belong to your local file.
+              </p>
+            </article>
+            <article class="guide-card">
+              <h3>Privacy concept</h3>
+              <ul>
+                <li>No CSV upload endpoint exists in this demo.</li>
+                <li>Filenames are hidden by default.</li>
+                <li>Solana proof logging never includes raw contacts.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
       </div>
 
       <aside class="stack">
@@ -638,6 +979,34 @@
           </div>
         </section>
 
+        <section id="settings" class="surface panel profile-card">
+          <div class="profile-head">
+            <div class="avatar">OC</div>
+            <div>
+              <p class="eyebrow">Profile</p>
+              <h2 style="margin-bottom: 4px">onchaindc</h2>
+              <p id="profileWallet" class="muted" style="margin-bottom: 0">Wallet not connected</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            <label class="setting-row">
+              <span>
+                <strong>Hide local filenames</strong>
+                <span>Prevents accidental filename leaks in streams and screenshots.</span>
+              </span>
+              <input id="fileMaskToggle" class="toggle" type="checkbox" checked />
+            </label>
+            <label class="setting-row">
+              <span>
+                <strong>Compact app mode</strong>
+                <span>Reduces spacing for demos on smaller screens.</span>
+              </span>
+              <input id="compactToggle" class="toggle" type="checkbox" />
+            </label>
+          </div>
+        </section>
+
         <section class="surface panel">
           <h2>Run summary</h2>
           <div class="metrics">
@@ -645,6 +1014,12 @@
             <div class="metric"><span>Network set</span><strong id="metricCounterparty">0</strong></div>
             <div class="metric"><span>Matches</span><strong id="metricMatches">0</strong></div>
           </div>
+        </section>
+
+        <section class="surface panel">
+          <p class="eyebrow">Log</p>
+          <h2>Activity trail</h2>
+          <div id="activityLog" class="activity-log"></div>
         </section>
       </aside>
     </main>
@@ -674,7 +1049,16 @@
         owner: emptySource(),
         counterparty: emptySource(),
         result: null,
-        walletPublicKey: ""
+        walletPublicKey: "",
+        theme: getInitialTheme(),
+        maskFilenames: true,
+        compactMode: false,
+        logs: [
+          {
+            title: "App ready",
+            body: "Contacts stay in this browser tab until you clear or refresh."
+          }
+        ]
       };
 
       const el = {
@@ -703,7 +1087,13 @@
         ownerCommitment: document.getElementById("ownerCommitment"),
         counterpartyCommitment: document.getElementById("counterpartyCommitment"),
         resultCommitment: document.getElementById("resultCommitment"),
-        proofLink: document.getElementById("proofLink")
+        proofLink: document.getElementById("proofLink"),
+        themeLight: document.getElementById("themeLight"),
+        themeDark: document.getElementById("themeDark"),
+        fileMaskToggle: document.getElementById("fileMaskToggle"),
+        compactToggle: document.getElementById("compactToggle"),
+        profileWallet: document.getElementById("profileWallet"),
+        activityLog: document.getElementById("activityLog")
       };
 
       el.ownerInput.addEventListener("change", (event) => loadFile(event, "owner"));
@@ -712,11 +1102,95 @@
       el.findButton.addEventListener("click", findMatches);
       el.proofButton.addEventListener("click", logProof);
       el.walletButton.addEventListener("click", connectWallet);
+      el.themeLight.addEventListener("click", () => setTheme("light"));
+      el.themeDark.addEventListener("click", () => setTheme("dark"));
+      el.fileMaskToggle.addEventListener("change", () => {
+        state.maskFilenames = el.fileMaskToggle.checked;
+        addLog("Privacy setting updated", state.maskFilenames ? "Local filenames are hidden." : "Local filenames are visible.");
+        render();
+      });
+      el.compactToggle.addEventListener("change", () => {
+        state.compactMode = el.compactToggle.checked;
+        addLog("Display setting updated", state.compactMode ? "Compact mode is enabled." : "Comfortable spacing is enabled.");
+        render();
+      });
 
+      applyTheme();
       render();
+
+      function getInitialTheme() {
+        const saved = readPreference("pff-theme");
+        if (saved === "dark" || saved === "light") return saved;
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+        return "light";
+      }
+
+      function setTheme(theme) {
+        state.theme = theme;
+        writePreference("pff-theme", theme);
+        applyTheme();
+        addLog("Theme updated", theme === "dark" ? "Dark mode is active." : "Light mode is active.");
+        render();
+      }
+
+      function applyTheme() {
+        if (document.documentElement) {
+          document.documentElement.dataset.theme = state.theme;
+        }
+      }
+
+      function readPreference(key) {
+        try {
+          return window.localStorage ? window.localStorage.getItem(key) : null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function writePreference(key, value) {
+        try {
+          if (window.localStorage) window.localStorage.setItem(key, value);
+        } catch (_) {
+          return null;
+        }
+      }
 
       function emptySource() {
         return { contacts: [], droppedRows: 0, warnings: [], sourceName: "" };
+      }
+
+      function addLog(title, body) {
+        state.logs = [{ title, body }, ...state.logs].slice(0, 5);
+      }
+
+      function renderActivityLog() {
+        el.activityLog.innerHTML = state.logs
+          .map(
+            (entry) =>
+              `<div class="log-item"><span class="log-dot"></span><div><strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(entry.body)}</span></div></div>`
+          )
+          .join("");
+      }
+
+      function summarizeSource(source) {
+        return `${source.contacts.length} usable contact${source.contacts.length === 1 ? "" : "s"}, ${source.droppedRows} skipped row${
+          source.droppedRows === 1 ? "" : "s"
+        }.`;
+      }
+
+      function sourceLabel(source) {
+        if (!source.sourceName) return "";
+        return state.maskFilenames ? "Local file loaded" : sanitizeFileName(source.sourceName);
+      }
+
+      function sanitizeFileName(name) {
+        const clean = name.replace(/[^\w.\- ]/g, "").trim();
+        if (!clean) return "Local file";
+        return clean.length > 28 ? `${clean.slice(0, 24)}...` : clean;
+      }
+
+      function shortAddress(address) {
+        return `${address.slice(0, 4)}...${address.slice(-4)}`;
       }
 
       async function loadFile(event, target) {
@@ -726,7 +1200,8 @@
         const text = await file.text();
         state[target] = parseContactCsv(text, file.name);
         state.result = null;
-        setStatus(`${file.name} parsed locally.`);
+        addLog(target === "owner" ? "Your contacts loaded" : "Network set loaded", summarizeSource(state[target]));
+        setStatus(`${target === "owner" ? "Your contacts" : "Network set"} parsed locally.`);
         clearError();
         render();
       }
@@ -735,6 +1210,7 @@
         state.owner = parseContactCsv(rowsToCsv(sampleOwner), "sample-my-contacts.csv");
         state.counterparty = parseContactCsv(rowsToCsv(sampleCounterparty), "sample-private-network.csv");
         state.result = null;
+        addLog("Sample contacts loaded", "Two mutual friends are expected in the sample data.");
         clearError();
         setStatus("Sample contacts loaded. Two mutual friends are expected.");
         render();
@@ -775,6 +1251,10 @@
           matches
         };
 
+        addLog(
+          "Private set intersection complete",
+          `${matches.length} mutual friend${matches.length === 1 ? "" : "s"} found from hashed local sets.`
+        );
         setStatus(`Found ${matches.length} mutual friend${matches.length === 1 ? "" : "s"} without uploading a CSV.`);
         render();
       }
@@ -791,6 +1271,7 @@
           const response = await provider.connect();
           state.walletPublicKey = response.publicKey.toString();
           el.walletButton.textContent = `${state.walletPublicKey.slice(0, 4)}...${state.walletPublicKey.slice(-4)}`;
+          addLog("Wallet connected", `${shortAddress(state.walletPublicKey)} is ready for proof logging.`);
           setStatus("Phantom wallet connected on devnet.");
           render();
         } catch (error) {
@@ -858,6 +1339,7 @@
           );
 
           setStatus("Proof memo confirmed on Solana.");
+          addLog("Solana proof logged", `${shortHash(signature, 8, 6)} confirmed on devnet.`);
           el.proofLink.innerHTML = `<a href="https://explorer.solana.com/tx/${signature}?cluster=devnet" target="_blank" rel="noreferrer">View Solana proof</a>`;
         } catch (error) {
           showError(error.message || "Unable to submit the Solana proof memo.");
@@ -867,8 +1349,20 @@
       }
 
       function render() {
-        el.ownerFile.textContent = state.owner.sourceName || "";
-        el.counterpartyFile.textContent = state.counterparty.sourceName || "";
+        if (document.body) {
+          document.body.classList.toggle("compact", state.compactMode);
+        }
+        el.themeLight.classList.toggle("is-active", state.theme === "light");
+        el.themeDark.classList.toggle("is-active", state.theme === "dark");
+        el.themeLight.setAttribute("aria-pressed", String(state.theme === "light"));
+        el.themeDark.setAttribute("aria-pressed", String(state.theme === "dark"));
+        el.fileMaskToggle.checked = state.maskFilenames;
+        el.compactToggle.checked = state.compactMode;
+        el.profileWallet.textContent = state.walletPublicKey
+          ? `Wallet ${shortAddress(state.walletPublicKey)} on devnet`
+          : "Wallet not connected";
+        el.ownerFile.textContent = sourceLabel(state.owner);
+        el.counterpartyFile.textContent = sourceLabel(state.counterparty);
         el.ownerCount.textContent = state.owner.contacts.length;
         el.ownerDropped.textContent = state.owner.droppedRows;
         el.counterpartyCount.textContent = state.counterparty.contacts.length;
@@ -878,6 +1372,7 @@
         el.metricMatches.textContent = state.result ? state.result.matchCount : 0;
         el.findButton.disabled = !(state.owner.contacts.length && state.counterparty.contacts.length);
         el.proofButton.disabled = !(state.result && state.walletPublicKey);
+        renderActivityLog();
 
         if (!state.result) {
           el.emptyResults.classList.remove("hidden");
