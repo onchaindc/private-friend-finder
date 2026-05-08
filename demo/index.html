@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Private Friend Finder Demo</title>
+    <script src="https://unpkg.com/@solana/web3.js@1.98.0/lib/index.iife.min.js"></script>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #101820;
+        --cloud: #f7f8f3;
+        --mint: #d8f3dc;
+        --fern: #2d6a4f;
+        --ember: #f77f00;
+        --berry: #7b2cbf;
+        --lagoon: #0077b6;
+        --line: rgba(16, 24, 32, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(216, 243, 220, 0.55), rgba(247, 248, 243, 0) 34rem),
+          var(--cloud);
+        color: var(--ink);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.46;
+      }
+
+      .topbar {
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.86);
+        backdrop-filter: blur(16px);
+      }
+
+      .topbar-inner,
+      .shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 0;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--ink);
+        color: white;
+        font-weight: 900;
+      }
+
+      .eyebrow {
+        margin: 0 0 4px;
+        color: var(--fern);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 0;
+        font-size: clamp(22px, 4vw, 32px);
+        line-height: 1.05;
+      }
+
+      .shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 24px;
+        padding: 24px 0 40px;
+      }
+
+      .stack {
+        display: grid;
+        gap: 24px;
+      }
+
+      .surface {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: white;
+        box-shadow: 0 18px 50px rgba(16, 24, 32, 0.12);
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .hero {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .hero h2 {
+        max-width: 760px;
+        margin-bottom: 12px;
+        font-size: clamp(26px, 5vw, 42px);
+        line-height: 1.02;
+      }
+
+      .muted {
+        color: rgba(16, 24, 32, 0.68);
+        line-height: 1.65;
+      }
+
+      .upload-grid {
+        display: grid;
+        gap: 14px;
+        margin-top: 22px;
+      }
+
+      .upload-card {
+        border: 1px dashed rgba(16, 24, 32, 0.18);
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+      }
+
+      .upload-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .upload-copy {
+        display: flex;
+        gap: 12px;
+      }
+
+      .icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 8px;
+        border: 1px solid rgba(45, 106, 79, 0.25);
+        background: rgba(216, 243, 220, 0.65);
+        color: var(--fern);
+        font-weight: 900;
+      }
+
+      .upload-card:nth-child(2) .icon {
+        border-color: rgba(247, 127, 0, 0.25);
+        background: #fff7ed;
+        color: #9a3412;
+      }
+
+      .upload-card h3 {
+        margin-bottom: 4px;
+        font-size: 16px;
+      }
+
+      .upload-card input {
+        display: none;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .btn {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 0;
+        border-radius: 6px;
+        padding: 0 14px;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .btn-dark {
+        background: var(--ink);
+        color: white;
+      }
+
+      .btn-green {
+        background: var(--fern);
+        color: white;
+      }
+
+      .btn-soft {
+        border: 1px solid var(--line);
+        background: var(--cloud);
+        color: var(--ink);
+      }
+
+      .btn:hover:not(:disabled) {
+        filter: brightness(0.96);
+      }
+
+      .counts {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        max-width: 420px;
+        margin-top: 14px;
+      }
+
+      .count {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--cloud);
+        padding: 10px 12px;
+      }
+
+      .count span {
+        display: block;
+        color: rgba(16, 24, 32, 0.48);
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .count strong {
+        display: block;
+        margin-top: 3px;
+        font-size: 22px;
+      }
+
+      .runbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 20px;
+        border-top: 1px solid var(--line);
+        padding-top: 18px;
+      }
+
+      .status {
+        min-height: 22px;
+        margin: 0;
+        color: rgba(16, 24, 32, 0.68);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .alert {
+        display: none;
+        margin-top: 14px;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        background: #fef2f2;
+        padding: 10px 12px;
+        color: #b91c1c;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .alert.show {
+        display: block;
+      }
+
+      .privacy-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .privacy-step {
+        display: flex;
+        gap: 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--cloud);
+        padding: 12px;
+      }
+
+      .privacy-step .mini-icon {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 6px;
+        background: white;
+        color: var(--fern);
+        font-weight: 900;
+      }
+
+      .privacy-step h3 {
+        margin-bottom: 4px;
+        font-size: 15px;
+      }
+
+      .privacy-step p {
+        margin-bottom: 0;
+        color: rgba(16, 24, 32, 0.66);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .mode {
+        margin-top: 16px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--cloud);
+        padding: 12px;
+        font-size: 14px;
+      }
+
+      .mode strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .results-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 18px;
+      }
+
+      .run-id {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--cloud);
+        padding: 8px 10px;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .table {
+        overflow: hidden;
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr 1fr;
+        gap: 10px;
+        padding: 12px;
+        border-top: 1px solid var(--line);
+        font-size: 14px;
+      }
+
+      .row:first-child {
+        border-top: 0;
+        background: var(--ink);
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .mono {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      .commitments {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .commitment {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--cloud);
+        padding: 11px;
+      }
+
+      .commitment span {
+        display: block;
+        margin-bottom: 6px;
+        color: rgba(16, 24, 32, 0.48);
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .commitment code {
+        overflow-wrap: anywhere;
+        color: rgba(16, 24, 32, 0.72);
+        font-size: 12px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .metrics {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .metric {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--cloud);
+        padding: 10px 12px;
+      }
+
+      .metric span {
+        color: rgba(16, 24, 32, 0.66);
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .metric strong {
+        font-size: 22px;
+      }
+
+      .proof-link {
+        margin-top: 18px;
+      }
+
+      .proof-link a {
+        display: inline-flex;
+        min-height: 42px;
+        align-items: center;
+        border-radius: 6px;
+        background: var(--mint);
+        padding: 0 14px;
+        color: var(--fern);
+        font-size: 14px;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      @media (max-width: 900px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .topbar-inner,
+        .hero,
+        .upload-head,
+        .runbar,
+        .results-head {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .commitments {
+          grid-template-columns: 1fr;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">PFF</div>
+          <div>
+            <p class="eyebrow">Solana + Arcium MVP</p>
+            <h1>Private Friend Finder</h1>
+          </div>
+        </div>
+        <button id="walletButton" class="btn btn-dark" type="button">Connect Phantom</button>
+      </div>
+    </header>
+
+    <main class="shell">
+      <div class="stack">
+        <section class="surface panel">
+          <div class="hero">
+            <div>
+              <p class="eyebrow">Find matches privately</p>
+              <h2>Upload locally. Compare privately. Prove lightly.</h2>
+              <p class="muted">
+                CSVs are parsed, normalized, and hashed in this browser tab. The demo returns only the intersection;
+                the Solana memo stores commitments and match count, never the address book.
+              </p>
+            </div>
+            <button id="sampleButton" class="btn btn-soft" type="button">Load Sample</button>
+          </div>
+
+          <div class="upload-grid">
+            <article class="upload-card">
+              <div class="upload-head">
+                <div class="upload-copy">
+                  <div class="icon">CSV</div>
+                  <div>
+                    <h3>Your contacts</h3>
+                    <p class="muted">Upload a CSV exported from your contacts app. The file never leaves this tab.</p>
+                    <p id="ownerFile" class="eyebrow"></p>
+                  </div>
+                </div>
+                <label class="btn btn-dark">
+                  Upload
+                  <input id="ownerInput" type="file" accept=".csv,text/csv,text/plain" />
+                </label>
+              </div>
+              <div class="counts">
+                <div class="count"><span>Usable contacts</span><strong id="ownerCount">0</strong></div>
+                <div class="count"><span>Skipped rows</span><strong id="ownerDropped">0</strong></div>
+              </div>
+            </article>
+
+            <article class="upload-card">
+              <div class="upload-head">
+                <div class="upload-copy">
+                  <div class="icon">CSV</div>
+                  <div>
+                    <h3>Private network set</h3>
+                    <p class="muted">For the no-install demo, load a second local CSV or use the sample set.</p>
+                    <p id="counterpartyFile" class="eyebrow"></p>
+                  </div>
+                </div>
+                <label class="btn btn-dark">
+                  Upload
+                  <input id="counterpartyInput" type="file" accept=".csv,text/csv,text/plain" />
+                </label>
+              </div>
+              <div class="counts">
+                <div class="count"><span>Usable contacts</span><strong id="counterpartyCount">0</strong></div>
+                <div class="count"><span>Skipped rows</span><strong id="counterpartyDropped">0</strong></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="runbar">
+            <p id="status" class="status">Load contacts or use the sample set to start.</p>
+            <div class="button-row">
+              <button id="findButton" class="btn btn-green" type="button" disabled>Find Matches</button>
+              <button id="proofButton" class="btn btn-dark" type="button" disabled>Log Proof</button>
+            </div>
+          </div>
+          <p id="error" class="alert"></p>
+        </section>
+
+        <section id="emptyResults" class="surface panel">
+          <h2>Matches appear here</h2>
+          <p class="muted">Only masked labels and commitments are shown after a run.</p>
+        </section>
+
+        <section id="results" class="surface panel hidden">
+          <div class="results-head">
+            <div>
+              <p class="eyebrow">Intersection result</p>
+              <h2 id="matchTitle">0 mutual friends</h2>
+            </div>
+            <div id="runId" class="run-id"></div>
+          </div>
+          <div id="matchTable" class="table"></div>
+          <div class="commitments">
+            <div class="commitment"><span>Your set</span><code id="ownerCommitment"></code></div>
+            <div class="commitment"><span>Network set</span><code id="counterpartyCommitment"></code></div>
+            <div class="commitment"><span>Result</span><code id="resultCommitment"></code></div>
+          </div>
+          <div id="proofLink" class="proof-link"></div>
+        </section>
+      </div>
+
+      <aside class="stack">
+        <section class="surface panel">
+          <p class="eyebrow" style="color: var(--berry)">PSI engine</p>
+          <h2>Arcium-ready flow</h2>
+          <div class="privacy-list">
+            <div class="privacy-step">
+              <div class="mini-icon">1</div>
+              <div><h3>No CSV upload</h3><p>Contacts become normalized email or phone keys on-device.</p></div>
+            </div>
+            <div class="privacy-step">
+              <div class="mini-icon">2</div>
+              <div><h3>Encrypted computation</h3><p>The repo includes an Arcium SDK boundary for a deployed PSI MXE.</p></div>
+            </div>
+            <div class="privacy-step">
+              <div class="mini-icon">3</div>
+              <div><h3>Small public proof</h3><p>Solana receives commitments, run id, and match count. Raw contacts stay private.</p></div>
+            </div>
+          </div>
+          <div class="mode">
+            <strong>Standalone mode active</strong>
+            <p class="muted" style="margin-bottom: 0">
+              This file runs without npm. The Next.js version and Arcium adapter live beside it in the repo.
+            </p>
+          </div>
+        </section>
+
+        <section class="surface panel">
+          <h2>Run summary</h2>
+          <div class="metrics">
+            <div class="metric"><span>Your set</span><strong id="metricOwner">0</strong></div>
+            <div class="metric"><span>Network set</span><strong id="metricCounterparty">0</strong></div>
+            <div class="metric"><span>Matches</span><strong id="metricMatches">0</strong></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <script>
+      const MEMO_PROGRAM_ID = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
+      const RPC_URL = "https://api.devnet.solana.com";
+
+      const sampleOwner = [
+        ["name", "email", "phone"],
+        ["Maya Chen", "maya@arcium.dev", "+1 415 555 0142"],
+        ["Noah Reid", "noah@example.com", "+1 415 555 0160"],
+        ["Rafael Okafor", "rafael@solana.dev", "+234 801 555 0198"],
+        ["Priya Shah", "priya@example.org", "+44 7700 900123"],
+        ["Sam Rivera", "sam@builder.test", "+1 212 555 0181"]
+      ];
+
+      const sampleCounterparty = [
+        ["name", "email", "phone"],
+        ["Maya C.", "maya@arcium.dev", "+1 415 555 0142"],
+        ["Ife Adeyemi", "ife@example.net", "+234 802 555 0111"],
+        ["Rafael O.", "rafael@solana.dev", "+234 801 555 0198"],
+        ["Zoe Park", "zoe@example.io", "+1 646 555 0194"]
+      ];
+
+      const state = {
+        owner: emptySource(),
+        counterparty: emptySource(),
+        result: null,
+        walletPublicKey: ""
+      };
+
+      const el = {
+        ownerInput: document.getElementById("ownerInput"),
+        counterpartyInput: document.getElementById("counterpartyInput"),
+        ownerFile: document.getElementById("ownerFile"),
+        counterpartyFile: document.getElementById("counterpartyFile"),
+        ownerCount: document.getElementById("ownerCount"),
+        ownerDropped: document.getElementById("ownerDropped"),
+        counterpartyCount: document.getElementById("counterpartyCount"),
+        counterpartyDropped: document.getElementById("counterpartyDropped"),
+        metricOwner: document.getElementById("metricOwner"),
+        metricCounterparty: document.getElementById("metricCounterparty"),
+        metricMatches: document.getElementById("metricMatches"),
+        sampleButton: document.getElementById("sampleButton"),
+        findButton: document.getElementById("findButton"),
+        proofButton: document.getElementById("proofButton"),
+        walletButton: document.getElementById("walletButton"),
+        status: document.getElementById("status"),
+        error: document.getElementById("error"),
+        emptyResults: document.getElementById("emptyResults"),
+        results: document.getElementById("results"),
+        matchTitle: document.getElementById("matchTitle"),
+        matchTable: document.getElementById("matchTable"),
+        runId: document.getElementById("runId"),
+        ownerCommitment: document.getElementById("ownerCommitment"),
+        counterpartyCommitment: document.getElementById("counterpartyCommitment"),
+        resultCommitment: document.getElementById("resultCommitment"),
+        proofLink: document.getElementById("proofLink")
+      };
+
+      el.ownerInput.addEventListener("change", (event) => loadFile(event, "owner"));
+      el.counterpartyInput.addEventListener("change", (event) => loadFile(event, "counterparty"));
+      el.sampleButton.addEventListener("click", loadSample);
+      el.findButton.addEventListener("click", findMatches);
+      el.proofButton.addEventListener("click", logProof);
+      el.walletButton.addEventListener("click", connectWallet);
+
+      render();
+
+      function emptySource() {
+        return { contacts: [], droppedRows: 0, warnings: [], sourceName: "" };
+      }
+
+      async function loadFile(event, target) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const text = await file.text();
+        state[target] = parseContactCsv(text, file.name);
+        state.result = null;
+        setStatus(`${file.name} parsed locally.`);
+        clearError();
+        render();
+      }
+
+      function loadSample() {
+        state.owner = parseContactCsv(rowsToCsv(sampleOwner), "sample-my-contacts.csv");
+        state.counterparty = parseContactCsv(rowsToCsv(sampleCounterparty), "sample-private-network.csv");
+        state.result = null;
+        clearError();
+        setStatus("Sample contacts loaded. Two mutual friends are expected.");
+        render();
+      }
+
+      async function findMatches() {
+        clearError();
+        if (!state.owner.contacts.length || !state.counterparty.contacts.length) {
+          showError("Add both contact sets before running private set intersection.");
+          return;
+        }
+
+        el.findButton.disabled = true;
+        setStatus("Hashing and comparing contact sets in this browser tab...");
+
+        const ownerHashes = await hashContacts(state.owner.contacts);
+        const counterpartyHashes = await hashContacts(state.counterparty.contacts);
+        const counterpartyIndex = new Map(counterpartyHashes.map((entry) => [entry.hash, entry.contact]));
+        const seen = new Set();
+        const matches = [];
+
+        for (const entry of ownerHashes) {
+          const counterparty = counterpartyIndex.get(entry.hash);
+          if (!counterparty || seen.has(entry.hash)) continue;
+          seen.add(entry.hash);
+          matches.push({ hash: entry.hash, ownerContact: entry.contact, counterpartyKind: counterparty.kind });
+        }
+
+        state.result = {
+          runId: randomRunId(),
+          mode: "local-simulator",
+          matchCount: matches.length,
+          ownerCount: state.owner.contacts.length,
+          counterpartyCount: state.counterparty.contacts.length,
+          ownerCommitment: await setCommitment(ownerHashes.map((entry) => entry.hash)),
+          counterpartyCommitment: await setCommitment(counterpartyHashes.map((entry) => entry.hash)),
+          resultCommitment: await resultCommitment(matches.map((match) => match.hash)),
+          matches
+        };
+
+        setStatus(`Found ${matches.length} mutual friend${matches.length === 1 ? "" : "s"} without uploading a CSV.`);
+        render();
+      }
+
+      async function connectWallet() {
+        clearError();
+        const provider = window.solana;
+        if (!provider || !provider.isPhantom) {
+          showError("Phantom wallet was not found. Install Phantom or use the Next.js wallet adapter build.");
+          return;
+        }
+
+        try {
+          const response = await provider.connect();
+          state.walletPublicKey = response.publicKey.toString();
+          el.walletButton.textContent = `${state.walletPublicKey.slice(0, 4)}...${state.walletPublicKey.slice(-4)}`;
+          setStatus("Phantom wallet connected on devnet.");
+          render();
+        } catch (error) {
+          showError(error.message || "Wallet connection was cancelled.");
+        }
+      }
+
+      async function logProof() {
+        clearError();
+        if (!state.result) {
+          showError("Run a match first.");
+          return;
+        }
+
+        if (!state.walletPublicKey || !window.solana) {
+          showError("Connect Phantom before logging a proof.");
+          return;
+        }
+
+        if (!window.solanaWeb3) {
+          showError("Solana Web3 did not load from CDN. The local PSI demo still works; proof logging needs browser internet access.");
+          return;
+        }
+
+        el.proofButton.disabled = true;
+        setStatus("Preparing a compact Solana memo proof...");
+
+        try {
+          const web3 = window.solanaWeb3;
+          const connection = new web3.Connection(RPC_URL, "confirmed");
+          const publicKey = new web3.PublicKey(state.walletPublicKey);
+          const latest = await connection.getLatestBlockhash("confirmed");
+          const payload = {
+            app: "pff",
+            v: 1,
+            run: state.result.runId,
+            mode: state.result.mode,
+            owner: state.result.ownerCommitment.slice(0, 16),
+            counterparty: state.result.counterpartyCommitment.slice(0, 16),
+            result: state.result.resultCommitment.slice(0, 16),
+            matches: state.result.matchCount
+          };
+
+          const transaction = new web3.Transaction({
+            feePayer: publicKey,
+            blockhash: latest.blockhash,
+            lastValidBlockHeight: latest.lastValidBlockHeight
+          }).add(
+            new web3.TransactionInstruction({
+              keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
+              programId: new web3.PublicKey(MEMO_PROGRAM_ID),
+              data: new TextEncoder().encode(JSON.stringify(payload))
+            })
+          );
+
+          const response = await window.solana.signAndSendTransaction(transaction);
+          const signature = typeof response === "string" ? response : response.signature;
+          await connection.confirmTransaction(
+            {
+              signature,
+              blockhash: latest.blockhash,
+              lastValidBlockHeight: latest.lastValidBlockHeight
+            },
+            "confirmed"
+          );
+
+          setStatus("Proof memo confirmed on Solana.");
+          el.proofLink.innerHTML = `<a href="https://explorer.solana.com/tx/${signature}?cluster=devnet" target="_blank" rel="noreferrer">View Solana proof</a>`;
+        } catch (error) {
+          showError(error.message || "Unable to submit the Solana proof memo.");
+        } finally {
+          render();
+        }
+      }
+
+      function render() {
+        el.ownerFile.textContent = state.owner.sourceName || "";
+        el.counterpartyFile.textContent = state.counterparty.sourceName || "";
+        el.ownerCount.textContent = state.owner.contacts.length;
+        el.ownerDropped.textContent = state.owner.droppedRows;
+        el.counterpartyCount.textContent = state.counterparty.contacts.length;
+        el.counterpartyDropped.textContent = state.counterparty.droppedRows;
+        el.metricOwner.textContent = state.owner.contacts.length;
+        el.metricCounterparty.textContent = state.counterparty.contacts.length;
+        el.metricMatches.textContent = state.result ? state.result.matchCount : 0;
+        el.findButton.disabled = !(state.owner.contacts.length && state.counterparty.contacts.length);
+        el.proofButton.disabled = !(state.result && state.walletPublicKey);
+
+        if (!state.result) {
+          el.emptyResults.classList.remove("hidden");
+          el.results.classList.add("hidden");
+          el.proofLink.innerHTML = "";
+          return;
+        }
+
+        el.emptyResults.classList.add("hidden");
+        el.results.classList.remove("hidden");
+        el.matchTitle.textContent = `${state.result.matchCount} mutual friend${state.result.matchCount === 1 ? "" : "s"}`;
+        el.runId.textContent = `Run ${state.result.runId}`;
+        el.ownerCommitment.textContent = shortHash(state.result.ownerCommitment, 10, 8);
+        el.counterpartyCommitment.textContent = shortHash(state.result.counterpartyCommitment, 10, 8);
+        el.resultCommitment.textContent = shortHash(state.result.resultCommitment, 10, 8);
+        el.matchTable.innerHTML = renderMatchTable(state.result.matches);
+      }
+
+      function renderMatchTable(matches) {
+        const header = `<div class="row"><span>Local match</span><span>Kind</span><span>Commitment</span></div>`;
+        if (!matches.length) {
+          return `${header}<div class="row"><span>No overlap found</span><span>-</span><span>-</span></div>`;
+        }
+
+        return (
+          header +
+          matches
+            .map(
+              (match) =>
+                `<div class="row"><strong>${escapeHtml(match.ownerContact.maskedLabel)}</strong><span>${match.counterpartyKind}</span><span class="mono">${shortHash(match.hash, 7, 5)}</span></div>`
+            )
+            .join("")
+        );
+      }
+
+      function parseContactCsv(text, sourceName) {
+        const rows = parseCsvRows(text).filter((row) => row.some((cell) => cell.trim()));
+        if (!rows.length) return { contacts: [], droppedRows: 0, warnings: ["No rows found."], sourceName };
+
+        const header = detectHeader(rows[0]);
+        const dataRows = header.hasHeader ? rows.slice(1) : rows;
+        const contacts = [];
+        let droppedRows = 0;
+
+        dataRows.forEach((row, index) => {
+          const rowNumber = header.hasHeader ? index + 2 : index + 1;
+          const extracted = extractContact(row, header);
+          if (!extracted) {
+            droppedRows += 1;
+            return;
+          }
+
+          contacts.push({
+            id: `${sourceName}:${rowNumber}:${extracted.kind}:${extracted.normalizedValue}`,
+            rowNumber,
+            name: extracted.name,
+            email: extracted.email,
+            phone: extracted.phone,
+            kind: extracted.kind,
+            normalizedValue: extracted.normalizedValue,
+            matchKey: `${extracted.kind}:${extracted.normalizedValue}`,
+            maskedLabel:
+              extracted.kind === "email" ? maskEmail(extracted.normalizedValue) : maskPhone(extracted.normalizedValue)
+          });
+        });
+
+        return { contacts: dedupeContacts(contacts), droppedRows, warnings: [], sourceName };
+      }
+
+      function parseCsvRows(text) {
+        const rows = [];
+        let row = [];
+        let cell = "";
+        let inQuotes = false;
+
+        for (let index = 0; index < text.length; index += 1) {
+          const char = text[index];
+          const next = text[index + 1];
+
+          if (char === '"') {
+            if (inQuotes && next === '"') {
+              cell += '"';
+              index += 1;
+            } else {
+              inQuotes = !inQuotes;
+            }
+            continue;
+          }
+
+          if (char === "," && !inQuotes) {
+            row.push(cell.trim());
+            cell = "";
+            continue;
+          }
+
+          if ((char === "\n" || char === "\r") && !inQuotes) {
+            if (char === "\r" && next === "\n") index += 1;
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = "";
+            continue;
+          }
+
+          cell += char;
+        }
+
+        row.push(cell.trim());
+        rows.push(row);
+        return rows;
+      }
+
+      function detectHeader(row) {
+        const normalized = row.map((cell) => cell.toLowerCase().trim());
+        const emailIndex = normalized.findIndex((cell) => ["email", "e-mail", "mail"].some((label) => cell.includes(label)));
+        const phoneIndex = normalized.findIndex((cell) =>
+          ["phone", "mobile", "cell", "telephone", "tel"].some((label) => cell.includes(label))
+        );
+        const nameIndex = normalized.findIndex((cell) => ["name", "full name", "contact"].some((label) => cell.includes(label)));
+        return { hasHeader: emailIndex >= 0 || phoneIndex >= 0 || nameIndex >= 0, emailIndex, phoneIndex, nameIndex };
+      }
+
+      function extractContact(row, header) {
+        const name = getCell(row, header.nameIndex) || row.find((cell) => cell && !normalizeEmail(cell) && !normalizePhone(cell));
+        const email = normalizeEmail(getCell(row, header.emailIndex)) || row.map(normalizeEmail).find(Boolean);
+        const phone = normalizePhone(getCell(row, header.phoneIndex)) || row.map(normalizePhone).find(Boolean);
+
+        if (email) return { email, phone, name, kind: "email", normalizedValue: email };
+        if (phone) return { phone, name, kind: "phone", normalizedValue: phone };
+        return null;
+      }
+
+      function getCell(row, index) {
+        return index >= 0 ? row[index] : undefined;
+      }
+
+      function normalizeEmail(value) {
+        if (!value) return undefined;
+        const email = value.trim().toLowerCase();
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : undefined;
+      }
+
+      function normalizePhone(value) {
+        if (!value) return undefined;
+        const digits = value.replace(/\D/g, "");
+        if (digits.length < 7) return undefined;
+        return digits.startsWith("00") ? digits.slice(2) : digits;
+      }
+
+      function dedupeContacts(contacts) {
+        const seen = new Set();
+        return contacts.filter((contact) => {
+          if (seen.has(contact.matchKey)) return false;
+          seen.add(contact.matchKey);
+          return true;
+        });
+      }
+
+      async function hashContacts(contacts) {
+        return Promise.all(
+          contacts.map(async (contact) => ({
+            contact,
+            hash: await sha256Hex(`private-friend-finder:v1:${contact.matchKey}`)
+          }))
+        );
+      }
+
+      async function sha256Hex(value) {
+        if (!crypto.subtle) {
+          throw new Error("Web Crypto is unavailable in this browser context.");
+        }
+
+        const encoded = new TextEncoder().encode(value);
+        const digest = await crypto.subtle.digest("SHA-256", encoded);
+        return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+      }
+
+      async function setCommitment(hashes) {
+        return sha256Hex(`set:v1:${hashes.slice().sort().join("|")}`);
+      }
+
+      async function resultCommitment(hashes) {
+        return sha256Hex(`result:v1:${hashes.slice().sort().join("|")}`);
+      }
+
+      function randomRunId() {
+        const bytes = new Uint8Array(8);
+        crypto.getRandomValues(bytes);
+        return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+      }
+
+      function maskEmail(email) {
+        const [name, domain] = email.split("@");
+        return `${name.slice(0, 2)}${name.length > 2 ? "***" : "*"}@${domain}`;
+      }
+
+      function maskPhone(phone) {
+        return `***-***-${phone.slice(-4)}`;
+      }
+
+      function rowsToCsv(rows) {
+        return rows.map((row) => row.map(escapeCsvCell).join(",")).join("\n");
+      }
+
+      function escapeCsvCell(value) {
+        return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+      }
+
+      function shortHash(hash, prefix = 7, suffix = 5) {
+        return `${hash.slice(0, prefix)}...${hash.slice(-suffix)}`;
+      }
+
+      function setStatus(message) {
+        el.status.textContent = message;
+      }
+
+      function showError(message) {
+        el.error.textContent = message;
+        el.error.classList.add("show");
+      }
+
+      function clearError() {
+        el.error.textContent = "";
+        el.error.classList.remove("show");
+      }
+
+      function escapeHtml(value) {
+        return value.replace(/[&<>"']/g, (char) => {
+          const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" };
+          return map[char];
+        });
+      }
+    </script>
+  </body>
+</html>
