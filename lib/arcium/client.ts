@@ -7,7 +7,13 @@ type PrepareInputArgs = {
 export async function prepareArciumEncryptedInput({
   scalarHashes
 }: PrepareInputArgs): Promise<ArciumPreparedInput> {
-  const { RescueCipher, x25519 } = await import("@arcium-hq/client");
+  const arciumClient = (await import("@arcium-hq/client")) as any;
+  const { RescueCipher, x25519 } = arciumClient;
+
+  if (!RescueCipher || !x25519) {
+    throw new Error("Installed Arcium client does not expose the demo encryption helpers expected by this adapter.");
+  }
+
   const privateKey = x25519.utils.randomSecretKey();
   const clientPublicKey = x25519.getPublicKey(privateKey);
 
