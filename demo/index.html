@@ -60,26 +60,26 @@
       }
 
       html[data-theme="arcium"] {
-        --page: #f7f4fb;
-        --page-accent: rgba(200, 186, 229, 0.24);
-        --card: rgba(255, 255, 255, 0.82);
+        --page: #f4eefc;
+        --page-accent: rgba(170, 132, 232, 0.32);
+        --card: rgba(255, 255, 255, 0.84);
         --card-strong: #ffffff;
-        --card-soft: #f1ebf8;
-        --text: #1c1630;
-        --text-muted: rgba(28, 22, 48, 0.72);
-        --text-soft: rgba(28, 22, 48, 0.48);
-        --line: rgba(28, 22, 48, 0.1);
-        --line-strong: rgba(28, 22, 48, 0.16);
-        --brand: #7866a4;
-        --brand-soft: rgba(120, 102, 164, 0.14);
-        --accent: #99a6c6;
-        --accent-soft: rgba(153, 166, 198, 0.16);
-        --button: #20193a;
+        --card-soft: #eee5fb;
+        --text: #221537;
+        --text-muted: rgba(34, 21, 55, 0.74);
+        --text-soft: rgba(34, 21, 55, 0.5);
+        --line: rgba(53, 29, 92, 0.12);
+        --line-strong: rgba(53, 29, 92, 0.18);
+        --brand: #7f4fd3;
+        --brand-soft: rgba(127, 79, 211, 0.16);
+        --accent: #b385ff;
+        --accent-soft: rgba(179, 133, 255, 0.18);
+        --button: #2b1747;
         --button-text: #fcfbff;
-        --badge: #ece5fa;
-        --badge-text: #5d468d;
-        --shadow: 0 24px 70px rgba(60, 43, 92, 0.11);
-        --hero: linear-gradient(180deg, rgba(241, 235, 248, 0.92), rgba(247, 244, 251, 0.78));
+        --badge: #eadbff;
+        --badge-text: #6b33bf;
+        --shadow: 0 24px 70px rgba(89, 45, 160, 0.14);
+        --hero: linear-gradient(180deg, rgba(233, 219, 255, 0.92), rgba(244, 238, 252, 0.82));
       }
 
       * {
@@ -317,6 +317,11 @@
         color: #fbfbff;
       }
 
+      html[data-theme="arcium"] .btn-brand {
+        background: linear-gradient(135deg, #7f4fd3, #9b67f2);
+        box-shadow: 0 10px 24px rgba(127, 79, 211, 0.22);
+      }
+
       .btn-ghost {
         border: 1px solid var(--line);
         background: transparent;
@@ -549,6 +554,10 @@
         gap: 12px;
       }
 
+      .invite-actions {
+        flex-wrap: wrap;
+      }
+
       .match-meta {
         flex-wrap: wrap;
         justify-content: flex-start;
@@ -758,7 +767,7 @@
         display: grid;
         grid-template-columns: 132px minmax(0, 1fr);
         gap: 14px;
-        align-items: center;
+        align-items: start;
         margin-top: 14px;
       }
 
@@ -769,6 +778,19 @@
         border: 1px solid var(--line);
         background: #ffffff;
         object-fit: cover;
+      }
+
+      .invite-meta {
+        min-width: 0;
+      }
+
+      .invite-link-text {
+        overflow-wrap: anywhere;
+      }
+
+      .invite-actions .btn {
+        flex: 1 1 140px;
+        min-width: 0;
       }
 
       .metrics {
@@ -1093,9 +1115,9 @@
             <span id="inviteCode" class="invite-code"></span>
             <div class="qr-shell">
               <img id="inviteQr" alt="Invite code QR" />
-              <div>
+              <div class="invite-meta">
                 <span class="meta-label">Invite link</span>
-                <p id="inviteLinkText" style="margin-top:8px;"></p>
+                <p id="inviteLinkText" class="invite-link-text" style="margin-top:8px;"></p>
                 <div class="invite-actions" style="margin-top:14px;">
                   <button id="copyInviteButton" class="btn btn-soft" type="button">Copy Link</button>
                   <button id="regenInviteButton" class="btn btn-brand" type="button">Generate New</button>
